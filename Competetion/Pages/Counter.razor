@@ -1,0 +1,27 @@
+﻿@page "/counter"
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">UserID: @value1</p>
+
+
+
+@code {
+    public string? value1 { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticatestate { get; set; }
+    private async Task DisplayGreeting()
+    {
+        var authState = await authenticatestate;
+        value1 = $"{authState.User.Identity.Name}";
+
+    }
+    protected override void OnInitialized()
+    {
+        DisplayGreeting();
+
+
+    }
+}

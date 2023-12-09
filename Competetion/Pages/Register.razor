@@ -1,0 +1,161 @@
+﻿@page "/register"
+@using System.Data.SqlClient
+
+@inject IJSRuntime js
+
+
+
+@inject IJSRuntime js
+@inject AuthenticationStateProvider authStateProvider
+@inject NavigationManager nm
+
+
+<PageTitle>Register </PageTitle>
+
+<style>
+    .form-signin {
+        max-width: 456px;
+    }
+</style>
+
+<section class="vh-80 container mb-4">
+    <div class="container">
+        <div  style="margin-top:2rem">
+            <div class="shadow-sm pb-5 form-signin w-100 m-auto" style="background-color:white; border-radius:1rem; padding:2rem;">
+                <h4 class="text-primary pb-3 text-center">Register</h4>
+                <form>
+
+
+
+                    <div class="form-outline">
+                        <input @bind="_Model.FirstName" type="text" id="firstName" class="form-control form-control-lg"
+                               placeholder="First Name" />
+                        <label class="form-label" for="firstName"> </label>
+                    </div>
+
+
+
+
+                    <div class="form-outline">
+                        <input type="text" @bind="_Model.LastName" id="lastName" class="form-control form-control-lg"
+                               placeholder="Last Name" />
+                        <label class="form-label" for="lastName"> </label>
+                    </div>
+
+
+                    <div class="form-outline py-1">
+                        <input type="email" @bind="_Model.Email" id="emailAddress" class="form-control form-control-lg"
+                               placeholder="Enter a valid Email Address" />
+                        <label class="form-label" for="emailAddress"> </label>
+                    </div>
+
+                    <div class="form-outline">
+                        <input type="password" @bind="Password" id="regpassword" class="form-control form-control-lg"
+                               placeholder="Enter Password" />
+                        <label class="form-label" for="regpassword"> </label>
+                    </div>
+
+                    <div class="form-outline">
+                        <input type="tel" @bind="_Model.ContactNo" id="phoneNumber" class="form-control form-control-lg"
+                               placeholder="Enter Contact Number" />
+                        <label class="form-label" for="phoneNumber"> </label>
+                    </div>
+
+
+
+
+
+                    <div class="form-outline datepicker">
+                        <input type="text" @bind="_Model.City" class="form-control form-control-lg" id="birthdayDate"
+                               placeholder="Enter City" />
+                        <label for="birthdayDate" class="form-label"></label>
+                    </div>
+
+
+
+
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="femaleGender"
+                           value="option1" @onchange="@(() => _Gender("Female"))" />
+                    <label class="form-check-label text-dark " for="femaleGender">Female</label>
+
+
+
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="maleGender"
+                           value="option2" @onchange="@(() => _Gender("Male"))" />
+                    <label class="form-check-label text-dark" for="maleGender">Male</label>
+
+
+
+
+
+                    <div class="text-center  mt-4 pt-2">
+                        <button type="button" class="w-100 btn btn-lg btn-primary"
+                                @onclick="SignUp">
+                            Register
+                        </button>
+                        <p class="small fs-5  mt-2 pt-1 mb-0 text-black">
+                            If already have an account? <a href="login " style="color:blue;"
+                                                           class="link-danger text-decoration-none">Login</a>
+                        </p>
+
+                    </div>
+                     </form>
+            </div>
+        </div>
+       
+    </div>
+    
+</section>
+@code {
+    public string? EncPass { get; set; }
+    public string? Password { get; set; }
+    public string? Gender { get; set; }
+    private EntUserLogin _Model { get; set; } = new EntUserLogin();
+
+
+    public static string EncodePasswordToBase64(string password)
+    {
+        try
+        {
+            byte[] encData_byte = new byte[password.Length];
+            encData_byte = System.Text.Encoding.UTF8.GetBytes(password);
+            string encodedData = Convert.ToBase64String(encData_byte);
+            return encodedData;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error in base64Encode" + ex.Message);
+        }
+    }
+
+    private async Task SignUp()
+    {
+        EncPass = EncodePasswordToBase64(Password);
+        _Model.Password = EncPass;
+        _Model.Gender = Gender;
+        _Model.Role = "User";
+
+        SqlParameter[] sp =
+            {
+              
+               
+                new SqlParameter("@FirstName",_Model!.FirstName),
+                new SqlParameter("@LastName", _Model.LastName),
+                new SqlParameter("@Email", _Model.Email),
+                new SqlParameter("@Password", _Model.Password),
+                new SqlParameter("@ContactNo", _Model.ContactNo),
+                new SqlParameter("@Role", _Model.Role),
+                new SqlParameter("@City", _Model.City),
+                new SqlParameter("@Gender", _Model.Gender),
+               
+    };
+
+        await DALCRUD.CRUD("U_SP_SaveSignUp",sp);
+        nm.NavigateTo("/login");
+    }
+
+    public void _Gender(string gender)
+    {
+        Gender = gender;
+    }
+}
