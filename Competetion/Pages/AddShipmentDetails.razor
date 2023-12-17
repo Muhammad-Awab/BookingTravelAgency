@@ -1,0 +1,172 @@
+﻿@page "/addnemp"
+   @page "/addnemp/{id}"
+
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row justify-content-center pt-5">
+            <!-- left column -->
+            <div class="col-md-6">
+                <!-- general form elements -->
+                <div class="card card-primary">
+                    <div class="card-header text-center">
+                        <h3>Add Shipment Record</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    <form>
+                        <div class="card-body no form-control-border">
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Company Name</label>
+                                <input type="text" class="form-control" @bind="model!.Company_Name" placeholder="Enter Company">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Weight</label>
+                                <input type="text" @bind="model.Shipment_Weight" class="form-control" placeholder="Enter Weight">
+                            </div>
+
+                            
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Shipment_From</label>
+                                <input type="text" class="form-control" @bind="model.Shipment_From" placeholder="Shipment_From">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Shipment_To</label>
+                                <input type="text" class="form-control" @bind="model.Shipment_To" placeholder="Shipment_To">
+                            </div>
+
+
+
+
+                            <div class="form-group">
+
+                                <label for="birthday">ShipmentDate:</label>
+                                <input type="date" @bind="model.Shipment_Date" class="form-control" />
+                            </div>
+
+
+                        </div>
+                        <!-- /.card-body -->
+
+                        <div class="card-footer">
+                            <button @onclick="SaveMedicineRecord" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+
+
+@code {
+
+    [Parameter]
+    public string? id { get; set; }
+
+    protected Shipment? model { get; set; } = new Shipment();
+
+    protected async Task SaveMedicineRecord()
+    {
+
+        model.UserID = int.Parse(value1);
+
+        if (id == null)
+        {
+            SqlParameter[] sp =
+            {
+         
+            new SqlParameter("@Shipment_From",model!.Shipment_From),
+            new SqlParameter("@Shipment_To", model.Shipment_To),
+            new SqlParameter("@Company_Name", model.Company_Name),
+            new SqlParameter("@Shipment_Weight", model.Shipment_Weight),
+            new SqlParameter("@Shipment_Date",model.Shipment_Date.ToString()),
+            new SqlParameter("@UserID",model.UserID)
+
+    };
+            await DALCRUD.CRUD("SP_InsertShipment", sp);
+        }
+        else
+        {
+            SqlParameter[] sp =
+            {
+
+                 new SqlParameter("@ShipmentID",model!.ShipmentID),
+                 new SqlParameter("@Shipment_From",model!.Shipment_From),
+            new SqlParameter("@Shipment_To", model.Shipment_To),
+            new SqlParameter("@Company_Name", model.Company_Name),
+            new SqlParameter("@Shipment_Weight", model.Shipment_Weight),
+            new SqlParameter("@Shipment_Date",model.Shipment_Date.ToString()),
+            new SqlParameter("@UserID",model.UserID)
+
+    };
+            await DALCRUD.CRUD("SP_UpdateShipment", sp);
+        }
+
+        nm.NavigateTo("/shipmentdetails",forceLoad:true);
+    }
+
+    DataTable dt = new DataTable();
+
+    public string? value1 { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticatestate { get; set; }
+    private async Task DisplayGreeting()
+    {
+        var authState = await authenticatestate;
+        value1 = $"{authState.User.Identity.Name}";
+
+    }
+    protected override void OnInitialized()
+    {
+        DisplayGreeting();
+
+
+    }
+
+
+    public string? PageName { get; set; } = "Add Medicine Record";
+    public string? ButtonName { get; set; } = "Save";
+    protected override async Task OnParametersSetAsync()
+    {
+        if (id != null)
+        {
+
+            PageName = "Update Medicine Record";
+            ButtonName = "Update";
+            SqlParameter[] sp =
+            {
+                new SqlParameter("@ShipmentID ",id)
+    };
+            dt = await DALCRUD.ReadDataSpecific("SP_GetShipmentByID", sp);
+            ConvertDataIntoArray();
+        }
+    }
+
+    private void ConvertDataIntoArray()
+    {
+        foreach (DataRow row in dt.Rows)
+        {
+            model = new Shipment
+                {
+                  
+                    Shipment_From = row["Shipment_From"].ToString(),
+                   
+                    Shipment_To = row["Shipment_To"].ToString(),
+                    Company_Name = row["Company_Name"].ToString(),
+                    Shipment_Weight = Convert.ToInt32(row["Shipment_Weight"]),
+                    ShipmentID = Convert.ToInt32(row["ShipmentID"]),
+                   
+                
+                    Shipment_Date = Convert.ToDateTime(row["Shipment_Date"]),
+                };
+
+
+        }
+
+    }
+}

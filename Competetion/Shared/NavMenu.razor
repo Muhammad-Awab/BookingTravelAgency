@@ -14,28 +14,64 @@
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
         <div class="nav-item px-3">
-           
+
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
-               
+
         </div>
 
         <div class="nav-item px-3">
-              <AuthorizeView Roles="User">
-     <Authorized>
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
+            <AuthorizeView Roles="Manager">
+                <Authorized>
+                    <NavLink class="nav-link" href="/manager">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Manager
+                    </NavLink>
                 </Authorized>
 
             </AuthorizeView>
+
+
+            <AuthorizeView Roles="Employee">
+                <Authorized>
+                   
+                    <NavLink class="nav-link" href="shipmentdetails">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Normal User
+                    </NavLink>
+                </Authorized>
+
+            </AuthorizeView>
+
+
+            <AuthorizeView Roles="Exective">
+                <Authorized>
+                    <NavLink class="nav-link" href="exective">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Exective
+                    </NavLink>
+                </Authorized>
+
+            </AuthorizeView>
+            <AuthorizeView>
+               
+                <NotAuthorized>
+                    <NavLink class="nav-link" href="login">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Login
+                    </NavLink>
+                    <NavLink class="nav-link" href="register">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Register
+                    </NavLink>
+                   
+
+                </NotAuthorized>
+                <Authorized>
+                    <NavLink @onclick="logout" class="nav-link" href="javascript:void(0)">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Logout
+                    </NavLink>
+                    
+                    </Authorized>
+            </AuthorizeView>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </div>
+       
     </nav>
 </div>
 
@@ -47,5 +83,11 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+    private async Task logout()
+    {
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(null);
+        nm.NavigateTo("/", true);
     }
 }

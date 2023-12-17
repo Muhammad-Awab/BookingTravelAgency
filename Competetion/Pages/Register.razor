@@ -18,9 +18,9 @@
     }
 </style>
 
-<section class="vh-80 container mb-4">
+<section class="vh-90 container mb-4">
     <div class="container">
-        <div  style="margin-top:2rem">
+        <div  >
             <div class="shadow-sm pb-5 form-signin w-100 m-auto" style="background-color:white; border-radius:1rem; padding:2rem;">
                 <h4 class="text-primary pb-3 text-center">Register</h4>
                 <form>
@@ -71,18 +71,29 @@
                         <label for="birthdayDate" class="form-label"></label>
                     </div>
 
+                    <div class="form-outline mb-4">
+                        <select class="form-select" aria-label="Default select example" @onchange="_Role">
+                            <option ID="DropDown">---Select City---</option>
+                          
 
+                                <option value="Employee">Employee</option>
+                                <option value="Manager">Manager</option>
+                                <option value="Exective">Exective</option>
+
+                            
+                        </select>
+                    </div>
 
 
                     <input class="form-check-input" type="radio" name="inlineRadioOptions" id="femaleGender"
                            value="option1" @onchange="@(() => _Gender("Female"))" />
-                    <label class="form-check-label text-dark " for="femaleGender">Female</label>
+                    <label class="form-check-label text-dark mx-3" for="femaleGender">Female</label>
 
 
 
                     <input class="form-check-input" type="radio" name="inlineRadioOptions" id="maleGender"
                            value="option2" @onchange="@(() => _Gender("Male"))" />
-                    <label class="form-check-label text-dark" for="maleGender">Male</label>
+                    <label class="form-check-label text-dark mx-3" for="maleGender">Male</label>
 
 
 
@@ -109,6 +120,7 @@
 @code {
     public string? EncPass { get; set; }
     public string? Password { get; set; }
+    private string? Role { get; set; }
     public string? Gender { get; set; }
     private EntUserLogin _Model { get; set; } = new EntUserLogin();
 
@@ -127,13 +139,16 @@
             throw new Exception("Error in base64Encode" + ex.Message);
         }
     }
-
+    private void _Role(ChangeEventArgs e)
+    {
+        Role = e.Value as string;
+    }
     private async Task SignUp()
     {
         EncPass = EncodePasswordToBase64(Password);
         _Model.Password = EncPass;
         _Model.Gender = Gender;
-        _Model.Role = "User";
+        _Model.Role = Role;
 
         SqlParameter[] sp =
             {

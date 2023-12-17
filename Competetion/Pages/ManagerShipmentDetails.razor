@@ -1,0 +1,111 @@
+﻿@page "/manager"
+<h3>ManagerShipmentDetails</h3>
+
+
+
+
+<div class="card">
+    @*    <div class="card-header">
+    <h3 class="card-title">DataTable with default features</h3>
+    </div> *@
+    <!-- /.card-header -->
+    <div class="card-body">
+
+        <div class="table-responsive">
+            <table id="myTable" class="table table-bordered table-striped ">
+                <thead>
+                    <tr>
+
+                        <th>Shipment Id</th>
+                        <th>Company_Name</th>
+                        <th>Shipment_Weight</th>
+                        <th>Shipment_From</th>
+                        <th>Shipment_To</th>
+                        <th>Shipment_Date</th>
+                        <th>ShipmentStatus</th>
+                        <th>Action</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (DataRow row in dt.Rows)
+                    {
+                        <tr>
+                            <td>@row["ShipmentID"]</td>
+                            <td>@row["Company_Name"]</td>
+                            <td>@row["Shipment_Weight"]</td>
+
+                            <td>@row["Shipment_From"]</td>
+                            <td>@row["Shipment_To"]</td>
+                            <td>@row["Shipment_Date"]</td>       
+                            <td>
+                                <div class="form-check form-switch" @onclick=@(() =>Update_Status(@row["ShipmentID"].ToString(),@row["ShipmentStatus"].ToString()))>
+                                    <input type="checkbox" class="form-check-input" checked="@row["ShipmentStatus"]" />
+                                </div>
+                            </td>
+                            <td>
+
+                                <button class="btn btn-warning" @onclick=@(() =>onDelete(@row["ShipmentID"].ToString()))>Delete</button>
+                            </td>
+                            
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+
+                    @*  <tr>
+                    <td colspan="10">
+                    <Pagination PI="pagingInfo" PageClassesEnabled="true" PageClass="Paging" PageClassSelected="active"></Pagination>
+                    </td>
+                    </tr> *@
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    <!-- /.card-body -->
+</div>
+
+@code {
+    protected Shipment? model { get; set; } = new Shipment();
+    public bool status { get; set; }
+    public string? PageName { get; set; } = "Add Medicine Record";
+    public string? ButtonName { get; set; } = "Save";
+    DataTable dt = new DataTable();
+    protected override async Task OnInitializedAsync()
+    {
+        dt = await DALCRUD.ReadData("SP_GetAllShipments");
+
+    }
+    private async Task onDelete(string id)
+    {
+        SqlParameter[] sp =
+            {
+
+            new SqlParameter("@ShipmentID",int.Parse(id)),
+
+    };
+        await DALCRUD.CRUD("SP_DeleteShipment", sp);
+        await OnInitializedAsync();
+    }
+
+    protected async Task Update_Status(string tgId, string status)
+    {
+        bool myBool = bool.Parse(status);
+        
+            myBool = !myBool;
+        
+      
+        SqlParameter[] sp =
+           {
+
+                 new SqlParameter("@ShipmentID",int.Parse(tgId)),
+                
+           
+            new SqlParameter("@ShipmentStatus",myBool)
+
+    };
+        await DALCRUD.CRUD("SP_UpdateStatus", sp);
+
+    }
+}

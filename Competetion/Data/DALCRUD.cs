@@ -103,7 +103,41 @@ namespace Competetion.Data
                 return new ContentResult { Content = "", ContentType = "application/json" };
             }
         }
+        public static async Task<DataTable> ReadDataSpecific(string ProcedureName, SqlParameter[] sqlParameters)
+        {
+            DataTable dt = new DataTable();
+            try
+            {
+                using (SqlConnection conn = DBHelper.GetConnection())
+                {
+                    using (SqlCommand cmd = new SqlCommand(ProcedureName, conn))
+                    {
+                        await conn.OpenAsync();
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddRange(sqlParameters);
+                        SqlDataAdapter sda = new SqlDataAdapter(cmd);
+                        sda.Fill(dt);
+                        SqlDataReader rdr = await cmd.ExecuteReaderAsync();
+                        await conn.CloseAsync();
 
+                        if (dt.Rows.Count > 0)
+                        {
+
+                            return dt;
+
+                        }
+                        else { return new DataTable(); }
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception Occurred: {ex.Message}");
+            }
+            return new DataTable();
+
+        }
 
         public static EntUserLogin GetUserByName(string? Email)
         {
@@ -123,6 +157,7 @@ namespace Competetion.Data
                 {
                     ee.UserId = sdr["UserId"].ToString();
                     ee.Email = sdr["Email"].ToString();
+                    ee.Role = sdr["Role"].ToString();
                     ee.Password = sdr["Password"].ToString();
 
 
